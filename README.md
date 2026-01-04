@@ -34,24 +34,6 @@ For GPU support, ensure you have CUDA-enabled PyTorch installed.
 
 ## Usage
 
-### Basic Example
-```python
-from scene_processing import build_scene_description_from_pcd
-from spatiallm_wrapper import SpatialLMClient
-
-# Load and process your point cloud
-scene_desc = build_scene_description_from_pcd("output/room_pointcloud.ply")
-
-# Initialize the spatial reasoning model
-client = SpatialLMClient(use_gpu=True)
-
-# Ask questions about your space
-answer = client.ask(scene_desc, "Where is the desk located?")
-print(answer)
-```
-
-### Interactive Mode
-
 Run the main application for an interactive Q&A session:
 ```bash
 python app/main.py
