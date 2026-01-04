@@ -1,5 +1,3 @@
-# app/scene_processing.py
-
 import open3d as o3d
 import numpy as np
 from sklearn.cluster import DBSCAN
@@ -48,6 +46,9 @@ def cluster_objects(pcd, eps=0.05, min_samples=30):
     returns a dict[label] = centroid_xyz
     """
     pts = np.asarray(pcd.points)
+    if len(pts) == 0:
+        return {}
+    
     labels = DBSCAN(eps=eps, min_samples=min_samples).fit_predict(pts)
     clusters = {}
     for idx, lbl in enumerate(labels):
@@ -64,7 +65,13 @@ def build_scene_description_from_pcd(ply_path: str) -> str:
     """
     High-level helper: load ply, segment, cluster, then serialize.
     """
-    pcd = o3d.io.read_point_cloud(ply_path)
+    try:
+        pcd = o3d.io.read_point_cloud(ply_path)
+        if len(np.asarray(pcd.points)) == 0:
+            raise ValueError(f"Point cloud at {ply_path} is empty")
+    except Exception as e:
+        raise FileNotFoundError(f"Could not load point cloud from {ply_path}: {e}")
+    
     # 1) Planes
     floor_model, floor_inliers, wall_models, _, remaining = segment_floor_and_walls(pcd)
     # 2) Objects
@@ -72,15 +79,18 @@ def build_scene_description_from_pcd(ply_path: str) -> str:
 
     # — Format text —
     lines = []
-    # Floor plane, if you want to include:
-    # lines.append(f"FLOOR plane: {list(floor_model)}")
     lines.append("WALLS:")
-    for m in wall_models:
-        lines.append(f"- plane: {np.round(m,3).tolist()}")
+    if len(wall_models) == 0:
+        lines.append("- No walls detected")
+    else:
+        for m in wall_models:
+            lines.append(f"- plane: {np.round(m,3).tolist()}")
     lines.append("")
     lines.append("OBJECTS:")
-    # name objects numerically or by heuristic
-    for i, (lbl, coord) in enumerate(centroids.items()):
-        lines.append(f"- object_{i} at {np.round(coord,3).tolist()}")
+    if len(centroids) == 0:
+        lines.append("- No objects detected")
+    else:
+        for i, (lbl, coord) in enumerate(centroids.items()):
+            lines.append(f"- object_{i} at {np.round(coord,3).tolist()}")
 
     return "\n".join(lines)
