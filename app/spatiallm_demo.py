@@ -1,8 +1,11 @@
+import sys
+sys.path.append('app')  
+
 from spatiallm_wrapper import SpatialLMClient
-from scene_processing    import build_scene_description_from_pcd
+from scene_processing import build_scene_description_from_pcd
 
 def main():
-    # 1) Point your code at the SLAM output .ply
+    # 1) Point at the SLAM output .ply
     ply_path = "output/room_pointcloud.ply"
 
     # 2) Auto-generate the scene description
