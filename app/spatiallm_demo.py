@@ -7,18 +7,18 @@ def main():
 
     # 2) Auto-generate the scene description
     scene_desc = build_scene_description_from_pcd(ply_path)
-    print("🗺 Scene description:\n", scene_desc)
+    print(" Scene description:\n", scene_desc)
 
     # 3) Start the SpatialLM client
     client = SpatialLMClient(use_gpu=True)
 
     # 4) Interactive loop
-    print("\n✅ Ready! Ask me about your room:")
+    print("\n Ready! Ask me about your room:")
     while True:
-        q = input("🗣 You: ")
+        q = input(" You: ")
         if q.lower() in ("exit","quit"): break
         ans = client.ask(scene_desc, q)
-        print("🤖 Assistant:", ans)
+        print(" Assistant:", ans)
 
 if __name__ == "__main__":
     main()
