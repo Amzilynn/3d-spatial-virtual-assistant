@@ -1,91 +1,175 @@
-# 3D Scene Understanding with SpatialLM
+# Interactive Virtual Assistant with Spatial Awareness
 
-A Python application that processes 3D point cloud data from SLAM systems and enables natural language querying of spatial environments using the SpatialLM model.
+An AI-powered spatial assistant that understands 3D room layouts and answers natural language queries about object locations and spatial relationships.
 
-## Overview
+---
 
-This project bridges the gap between 3D reconstruction and natural language understanding. It automatically segments point clouds into semantic components (floors, walls, objects), then leverages SpatialLM to answer questions about the spatial layout in plain English.
+##  Features
 
-## Features
+### Phase 1: MVP (Completed)
+- ✅ **Synthetic 3D Scene Generation**: Auto-generates a realistic room with furniture
+- ✅ **Spatial Reasoning Engine**: Answers queries like "Where is the chair?" with human-readable directions
+- ✅ **Interactive Visualization**: Real-time 3D highlighting with Open3D
+- ✅ **100% Offline**: No internet required, runs locally
 
-- **Automatic Scene Segmentation**: Uses RANSAC plane detection to identify floors and walls
-- **Object Clustering**: DBSCAN-based clustering to locate distinct objects in the scene
-- **Natural Language Interface**: Ask questions about your 3D environment in plain English
-- **GPU Acceleration**: Optional GPU support for faster inference
-- **Plug-and-Play**: Works with standard PLY point cloud files from SLAM systems
+### Phase 2: Real 3D Reconstruction (NEW! )
+- ✅ **Video-to-3D Pipeline**: Converts room videos to 3D point clouds
+- ✅ **Depth Estimation**: Using Intel MiDaS for accurate depth maps
+- ✅ **Automatic Object Detection**: YOLOv8 identifies furniture (chairs, sofas, tables, etc.)
+- ✅ **3D Object Mapping**: Projects 2D detections to 3D coordinates
 
-## Requirements
-```bash
-pip install open3d numpy scikit-learn transformers torch
+---
+
+##  Quick Start
+
+### Prerequisites
+- Python 3.12
+- Virtual environment: `C:\venvs\3Dvenv` (or modify paths accordingly)
+
+### Installation
+
+```powershell
+# Activate virtual environment
+C:\venvs\3Dvenv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
 ```
 
-For GPU support, ensure you have CUDA-enabled PyTorch installed.
+### Usage
 
-## Project Structure
-```
-.
-├── app/
-│   ├── scene_processing.py    # Point cloud segmentation and clustering
-│   ├── spatiallm_wrapper.py   # SpatialLM model wrapper
-│   └── main.py                # Interactive CLI application
-└── output/
-    └── room_pointcloud.ply    # Your SLAM-generated point cloud
+#### Option 1: Synthetic Scene (Fast Demo)
+```powershell
+python spatial_assistant.py
 ```
 
-## Usage
-
-Run the main application for an interactive Q&A session:
-```bash
-python app/main.py
+#### Option 2: Real 3D from Video (Realistic)
+```powershell
+python spatial_assistant.py --video sample_room.mp4
 ```
 
-## How It Works
+---
 
-### 1. Scene Processing (`scene_processing.py`)
+## 🎮 How to Use
 
-- **`segment_floor_and_walls()`**: Applies RANSAC plane fitting to extract the dominant floor plane and up to two vertical wall planes
-- **`cluster_objects()`**: Uses DBSCAN to group remaining points into distinct objects and computes their centroids
-- **`build_scene_description_from_pcd()`**: Orchestrates the pipeline and generates a text description of the scene
-
-### 2. SpatialLM Interface (`spatiallm_wrapper.py`)
-
-- Wraps the SpatialLM1.1-Llama-1B model from Hugging Face
-- Handles model initialization with optional 8-bit quantization for GPU efficiency
-- Provides a simple `ask()` method for spatial reasoning queries
-
-### 3. Main Application (`main.py`)
-
-- Loads point cloud data from your SLAM system
-- Initializes the scene understanding pipeline
-- Provides an interactive command-line interface for queries
+1. **Run the assistant** (choose synthetic or video mode)
+2. **Wait for the 3D window** to appear showing the room
+3. **Close the window** to begin interaction
+4. **Ask questions**:
+   - "Where is the chair?"
+   - "How far is the sofa?"
+   - "Show me free space."
+5. **View highlights**: Objects you ask about will be highlighted with a **red bounding box + red sphere**
 
 
-## Model Information
+---
 
-This project uses [SpatialLM1.1-Llama-1B](https://huggingface.co/manycore-research/SpatialLM1.1-Llama-1B), a language model fine-tuned for spatial reasoning tasks. The model can:
-- Understand spatial relationships between objects
-- Answer questions about object locations
-- Reason about scene geometry and layout
+## 📁 Project Structure
+
+```
+3d-spatial-virtual-assistant/
+│
+├── spatial_assistant.py          # Main application (Synthetic + Video modes)
+├── video_processor.py             # Video frame extraction
+├── depth_estimator.py             # MiDaS depth estimation
+├── object_detector_real.py        # YOLO object detection
+├── real_scene_pipeline.py         # End-to-end video→3D pipeline
+│
+├── sample_room.mp4                # Example video for testing
+├── requirements.txt               # Python dependencies
+├── test_mvp.py                    # Unit tests
+└── README.md                      # This file
+```
+
+---
+
+## Testing
+
+### Test Synthetic Scene
+```powershell
+python test_mvp.py
+```
+
+### Test Video Pipeline (Standalone)
+```powershell
+python real_scene_pipeline.py
+```
+
+---
+
+##  Technical Details
+
+### Architecture
+
+#### Synthetic Mode
+1. **Scene Generation**: Procedurally generate room with furniture
+2. **Ground Truth Objects**: Known 3D positions for perfect demo
+3. **Spatial Reasoning**: Geometric calculations for distance/direction
+4. **Visualization**: Open3D rendering with highlights
+
+#### Video Mode
+1. **Video Processing**: Extract best frame from video
+2. **Depth Estimation**: MiDaS converts RGB → depth map
+3. **Point Cloud Creation**: Depth + RGB → 3D point cloud
+4. **Object Detection**: YOLOv8 detects furniture in 2D
+5. **3D Projection**: Map 2D detections to 3D using depth
+6. **Spatial Reasoning**: Same engine as synthetic mode
+
+### Key Components
+
+- **Depth Anything**: State-of-the-art monocular depth estimation
+- **YOLOv8**: Real-time object detection (nano model for speed)
+- **Open3D**: 3D visualization and point cloud processing
+- **Spatial Reasoning Engine**: Geometric calculations for natural language generation
+
+---
+
+## Configuration
+
+### Performance Tuning
+
+For **faster processing** (CPU-only):
+- Uses `DepthAnything` (faster, slightly less accurate)
+- Uses `yolov8n.pt` (nano model, fastest)
+- Processing time: ~15-30 seconds per video
+
+For **better quality** (GPU recommended):
+- Edit `real_scene_pipeline.py` line 30: change `model_type="DPT_Large"`
+- Edit `object_detector_real.py` line 81: change `model_name="yolov8x.pt"`
+- Processing time: ~5-10 seconds with GPU
+
+### Customization
+
+**Add more object types**: Edit `object_detector_real.py` line 16-22 to include more COCO classes
+
+**Adjust depth range**: Modify `max_depth` parameter in pipeline (default: 10 meters)
+
+**Change user position**: Edit `spatial_assistant.py` line 160-161 to customize viewpoint
+
+---
+
+## Supported Object Types
+
+Current YOLO detections:
+- Chair 🪑
+- Sofa / Couch 🛋️
+- Table (Dining Table) 🍽️
+- Bed 🛏️
+- TV 📺
+
+---
 
 
 
-## Future Enhancements
 
-- [ ] Semantic object labeling (chair, desk, etc.)
-- [ ] Support for more complex wall configurations
-- [ ] Integration with real-time SLAM systems
-- [ ] Web-based visualization interface
-- [ ] Multi-room scene understanding
+##  Future Enhancements
 
-## Contributing
+- [ ] Real-time SLAM with live camera feed
+- [ ] Voice input/output integration
+- [ ] Multi-room mapping
+- [ ] Augmented reality overlay
+- [ ] Mobile app deployment
 
-Contributions are welcome! Please feel free to submit issues or pull requests.
+---
 
-
-
-## Acknowledgments
-
-- Built with [Open3D](http://www.open3d.org/) for 3D processing
-- Powered by [SpatialLM](https://huggingface.co/manycore-research/SpatialLM1.1-Llama-1B) for spatial reasoning
-- Uses scikit-learn for clustering algorithms
-
+**Made with ❤️**

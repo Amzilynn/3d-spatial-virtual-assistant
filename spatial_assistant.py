@@ -314,18 +314,45 @@ def visualize_scene(pcd, objects: List[Dict], highlight_name: str = None):
 # 5. MAIN APP
 # ==============================================================================
 
-def interactive_cli():
+def interactive_cli(use_video: bool = False, video_path: str = "sample_room.mp4"):
     print("\n" + "="*60)
     print("   INTERACTIVE SPATIAL ASSISTANT (MVP)")
     print("   Microsoft Imagine Cup 2026")
     print("="*60)
     
-    # 1. Init
-    gen = SceneGenerator()
-    pcd, gt_objects = gen.load_scene() # Defaults to synthetic if no file
+    # 1. Init - Choose between synthetic or real scene
+    if use_video:
+        print(f"\n[Mode] REAL 3D SCENE from video: {video_path}")
+        try:
+            from real_scene_pipeline import RealScenePipeline
+            import torch
+            
+            use_gpu = torch.cuda.is_available()
+            pipeline = RealScenePipeline(use_gpu=use_gpu)
+            pcd, objects = pipeline.process_video(video_path)
+            
+        except Exception as e:
+            print(f"\n[ERROR] Failed to process video: {e}")
+            print("[Fallback] Using Synthetic Scene instead...\n")
+            import traceback
+            traceback.print_exc()
+            
+            gen = SceneGenerator()
+            pcd, gt_objects = gen.load_scene()
+            detector = ObjectDetector()
+            objects = detector.detect(pcd, known_objects=gt_objects)
+    else:
+        print("\n[Mode] SYNTHETIC SCENE (demo)")
+        gen = SceneGenerator()
+        pcd, gt_objects = gen.load_scene() # Defaults to synthetic if no file
+        
+        detector = ObjectDetector()
+        objects = detector.detect(pcd, known_objects=gt_objects)
     
-    detector = ObjectDetector()
-    objects = detector.detect(pcd, known_objects=gt_objects)
+    # 2. Initialize Spatial Reasoning
+    if not objects:
+        print("\n[ERROR] No objects detected! Cannot proceed.")
+        return
     
     engine = SpatialReasoningEngine(objects)
     
@@ -333,9 +360,9 @@ def interactive_cli():
     print("\n" + "-"*60)
     print("VISUAL GUIDE - What you'll see in the 3D window:")
     print("-"*60)
-    print("  🟦 POINT CLOUD: Room (grey floor, white walls, 3 colored objects)")
-    print("  🎯 RGB ARROWS: Coordinate frame (Red=X, Green=Y, Blue=Z)")
-    print("  ⬜ GREY BOXES: Objects not being queried")
+    print("   POINT CLOUD: Room (grey floor, white walls, 3 colored objects)")
+    print("   RGB ARROWS: Coordinate frame (Red=X, Green=Y, Blue=Z)")
+    print("   GREY BOXES: Objects not being queried")
     print("  🔴 RED BOX + SPHERE: The object you asked about! ← LOOK HERE")
     print("-"*60)
     print("\n[System] Try asking:")
@@ -347,7 +374,7 @@ def interactive_cli():
     # Initial Vis
     visualize_scene(pcd, objects)
 
-    # 2. Loop
+    # 3. Loop
     while True:
         try:
             query = input("\nUSER >> ").strip()
@@ -369,4 +396,17 @@ def interactive_cli():
             visualize_scene(pcd, objects, highlight_name)
 
 if __name__ == "__main__":
-    interactive_cli()
+    import argparse
+    
+    parser = argparse.ArgumentParser(description="Interactive Spatial Assistant with 3D Awareness")
+    parser.add_argument("--video", type=str, default=None, 
+                       help="Path to video file for real 3D reconstruction (e.g., sample_room.mp4)")
+    parser.add_argument("--synthetic", action="store_true", 
+                       help="Force synthetic scene (default if no --video)")
+    
+    args = parser.parse_args()
+    
+    if args.video:
+        interactive_cli(use_video=True, video_path=args.video)
+    else:
+        interactive_cli(use_video=False)
