@@ -1,6 +1,7 @@
 import open3d as o3d
 import numpy as np
 import sys
+import os
 import math
 from typing import List, Dict, Optional, Tuple, NamedTuple
 
@@ -34,7 +35,7 @@ class SceneGenerator:
             pcd: The combined point cloud
             gt_objects: Ground truth object metadata (for the detector)
         """
-        print("[SceneGenerator] Generating synthetic room...")
+        print("[SceneGenerator] Generating synthetic room (Walls, Floor, Sofa, Table, Chair)...")
         
         geometries = []
         gt_objects = []
@@ -100,17 +101,23 @@ class SceneGenerator:
         """
         Attempts to load a scene, otherwise creates synthetic.
         """
+        # Check explicit existence to avoid Open3D 'RPly' warning logs
+        if not os.path.exists(filepath):
+            print(f"[SceneGenerator] No local '{filepath}' found. Using Synthetic Scene Generator.")
+            return self.create_synthetic_room()
+            
         try:
             pcd = o3d.io.read_point_cloud(filepath)
             if pcd.is_empty():
-                raise FileNotFoundError
-            print(f"[SceneGenerator] Loaded {filepath}")
+                print(f"[SceneGenerator] '{filepath}' is empty.")
+                raise ValueError("Empty point cloud")
+            print(f"[SceneGenerator] Successfully loaded {filepath}")
             # NOTE: For a real loaded scene, we'd run real detection. 
             # For this MVP, if we load a file, we might not have labels.
             # We will fallback to synthetic if file load fails or is requested.
             return pcd, None 
-        except:
-            print("[SceneGenerator] File not found or empty. Using Synthetic Scene.")
+        except Exception as e:
+            print(f"[SceneGenerator] Error loading file: {e}. Fallback to Synthetic.")
             return self.create_synthetic_room()
 
 # ==============================================================================
@@ -255,21 +262,53 @@ class SpatialReasoningEngine:
 
 def visualize_scene(pcd, objects: List[Dict], highlight_name: str = None):
     """
-    Shows the scene. If highlight_name is provided, puts a bounding box around it.
+    Shows the scene. If highlight_name is provided:
+      1. Paints the target object's BBox bright RED.
+      2. Adds a floating sphere above the target object.
+      3. Dims/Greys out other BBoxes.
     """
     to_draw = [pcd]
     
-    # Always draw bounding boxes for all objects, but color them
+    # 1. Coordinate Frame (for orientation reference)
+    to_draw.append(o3d.geometry.TriangleMesh.create_coordinate_frame(size=1.0, origin=[0,0,0]))
+
+    detected_name = None
+
     for obj in objects:
-        bbox = obj['bounds']
-        if highlight_name and obj['label'].lower() == highlight_name.lower():
-            bbox.color = [1.0, 0.0, 1.0] # Magenta for selection
+        # Create a fresh bbox to avoid mutating the original repeatedly
+        center = obj['center']
+        extent = obj['dimensions']
+        # Re-create AxisAlignedBoundingBox from center/extent logic
+        # Min = center - extent/2, Max = center + extent/2
+        min_bound = np.array(center) - np.array(extent)/2
+        max_bound = np.array(center) + np.array(extent)/2
+        bbox = o3d.geometry.AxisAlignedBoundingBox(min_bound, max_bound)
+        
+        is_target = highlight_name and (obj['label'].lower() == highlight_name.lower())
+        
+        if is_target:
+            detected_name = obj['label']
+            # Highlight: Bright Red Box
+            bbox.color = [1.0, 0.0, 0.0] 
+            
+            # Add a "Pointer" Sphere bouncing above
+            sphere = o3d.geometry.TriangleMesh.create_sphere(radius=0.15)
+            sphere.paint_uniform_color([1.0, 0.0, 0.0]) # Red
+            # Float it 0.5m above the object
+            sphere.translate(np.array(center) + np.array([0, extent[1]/2 + 0.5, 0]))
+            to_draw.append(sphere)
+            
+            # Print for debug
+            print(f"[Visualizer] HIGHLIGHTING: {obj['label']} (Red Box + Sphere)")
         else:
-            bbox.color = [0.0, 0.0, 0.0] # Black for others
+            # Others: Dim Grey
+            bbox.color = [0.3, 0.3, 0.3]
+        
         to_draw.append(bbox)
 
-    print("[Visualizer] Opening window... (Close window to continue interaction if blocking)")
-    o3d.visualization.draw_geometries(to_draw, window_name="Imagine Cup Assistant MVP")
+    win_name = f"Assistant: {highlight_name if highlight_name else 'Room View'}"
+    print(f"[Visualizer] Opening '{win_name}'. CLOSE WINDOW to continue.")
+    o3d.visualization.draw_geometries(to_draw, window_name=win_name)
 
 # ==============================================================================
 # 5. MAIN APP
@@ -291,7 +330,15 @@ def interactive_cli():
     engine = SpatialReasoningEngine(objects)
     
     print(f"\n[System] Scene Loaded. I can see: {', '.join([o['label'] for o in objects])}")
-    print("[System] Try asking:")
+    print("\n" + "-"*60)
+    print("VISUAL GUIDE - What you'll see in the 3D window:")
+    print("-"*60)
+    print("  🟦 POINT CLOUD: Room (grey floor, white walls, 3 colored objects)")
+    print("  🎯 RGB ARROWS: Coordinate frame (Red=X, Green=Y, Blue=Z)")
+    print("  ⬜ GREY BOXES: Objects not being queried")
+    print("  🔴 RED BOX + SPHERE: The object you asked about! ← LOOK HERE")
+    print("-"*60)
+    print("\n[System] Try asking:")
     print("  - 'Where is the chair?'")
     print("  - 'How far is the sofa?'")
     print("  - 'Show free space.'")
@@ -303,7 +350,7 @@ def interactive_cli():
     # 2. Loop
     while True:
         try:
-            query = input("USER >> ").strip()
+            query = input("\nUSER >> ").strip()
         except EOFError:
             break
 
@@ -315,10 +362,10 @@ def interactive_cli():
         
         answer, highlight_name = engine.process_query(query)
         
-        print(f"ASSISTANT >> {answer}")
+        print(f"\nASSISTANT >> {answer}")
         
         if highlight_name:
-            print("[Visualizer] Updating view...")
+            print(f"\n💡 LOOK FOR: Red box + Red sphere above the {highlight_name}")
             visualize_scene(pcd, objects, highlight_name)
 
 if __name__ == "__main__":
