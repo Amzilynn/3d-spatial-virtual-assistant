@@ -7,16 +7,16 @@ An AI-powered spatial assistant that understands 3D room layouts and answers nat
 ##  Features
 
 ### Phase 1: MVP (Completed)
-- ✅ **Synthetic 3D Scene Generation**: Auto-generates a realistic room with furniture
-- ✅ **Spatial Reasoning Engine**: Answers queries like "Where is the chair?" with human-readable directions
-- ✅ **Interactive Visualization**: Real-time 3D highlighting with Open3D
-- ✅ **100% Offline**: No internet required, runs locally
+-  **Synthetic 3D Scene Generation**: Auto-generates a realistic room with furniture
+-  **Spatial Reasoning Engine**: Answers queries like "Where is the chair?" with human-readable directions
+-  **Interactive Visualization**: Real-time 3D highlighting with Open3D
+-  **100% Offline**: No internet required, runs locally
 
 ### Phase 2: Real 3D Reconstruction (NEW! )
-- ✅ **Video-to-3D Pipeline**: Converts room videos to 3D point clouds
-- ✅ **Depth Estimation**: Using Intel MiDaS for accurate depth maps
-- ✅ **Automatic Object Detection**: YOLOv8 identifies furniture (chairs, sofas, tables, etc.)
-- ✅ **3D Object Mapping**: Projects 2D detections to 3D coordinates
+-  **Video-to-3D Pipeline**: Converts room videos to 3D point clouds
+-  **Depth Estimation**: Using DepthAnything for accurate depth maps
+-  **Automatic Object Detection**: YOLOv8 identifies furniture (chairs, sofas, tables, etc.)
+-  **3D Object Mapping**: Projects 2D detections to 3D coordinates
 
 ---
 
@@ -50,7 +50,7 @@ python spatial_assistant.py --video sample_room.mp4
 
 ---
 
-## 🎮 How to Use
+##  How to Use
 
 1. **Run the assistant** (choose synthetic or video mode)
 2. **Wait for the 3D window** to appear showing the room
@@ -151,11 +151,11 @@ For **better quality** (GPU recommended):
 ## Supported Object Types
 
 Current YOLO detections:
-- Chair 🪑
-- Sofa / Couch 🛋️
-- Table (Dining Table) 🍽️
-- Bed 🛏️
-- TV 📺
+- Chair 
+- Sofa / Couch 
+- Table (Dining Table) 
+- Bed 
+- TV
 
 ---
 
