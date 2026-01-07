@@ -5,17 +5,17 @@ from spatiallm_wrapper import SpatialLMClient
 from scene_processing import build_scene_description_from_pcd
 
 def main():
-    # 1) Point at the SLAM output .ply
+    #  Point at the SLAM output .ply
     ply_path = "output/room_pointcloud.ply"
 
-    # 2) Auto-generate the scene description
+    #  Auto-generate the scene description
     scene_desc = build_scene_description_from_pcd(ply_path)
     print(" Scene description:\n", scene_desc)
 
-    # 3) Start the SpatialLM client
+    #  Start the SpatialLM client
     client = SpatialLMClient(use_gpu=True)
 
-    # 4) Interactive loop
+    #  Interactive loop
     print("\n Ready! Ask me about your room:")
     while True:
         q = input(" You: ")
