@@ -5,9 +5,7 @@ import os
 import math
 from typing import List, Dict, Optional, Tuple, NamedTuple
 
-# ==============================================================================
 # 1. SCENE GENERATION & LOADING
-# ==============================================================================
 
 class SceneObject(NamedTuple):
     name: str
