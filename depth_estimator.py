@@ -1,8 +1,3 @@
-"""
-Depth Estimation Module
-Uses Depth Anything model to estimate depth from RGB images and convert to point clouds
-"""
-
 import torch
 import cv2
 import numpy as np
