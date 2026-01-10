@@ -7,9 +7,6 @@ from object_detector_real import RealObjectDetector
 
 
 class RealScenePipeline:
-    """
-    End-to-end pipeline: Video → 3D Point Cloud + Detected Objects
-    """
     
     def __init__(self, use_gpu: bool = True):
         """
