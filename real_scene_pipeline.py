@@ -1,8 +1,3 @@
-"""
-Real Scene Pipeline
-Integrates video processing, depth estimation, and object detection
-"""
-
 import numpy as np
 import open3d as o3d
 from typing import Tuple, List, Dict, Optional
