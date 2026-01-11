@@ -141,9 +141,8 @@ class ObjectDetector:
         # (Simplified for MVP - assuming synthetic path is primary)
         return []
 
-# ==============================================================================
 # 3. SPATIAL REASONING ENGINE (The "Brain")
-# ==============================================================================
+
 
 class SpatialReasoningEngine:
     """
