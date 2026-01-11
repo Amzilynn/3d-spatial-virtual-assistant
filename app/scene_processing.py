@@ -3,12 +3,7 @@ import numpy as np
 from sklearn.cluster import DBSCAN
 
 def segment_floor_and_walls(pcd, dist_thresh=0.02, ransac_n=3, num_iter=1000):
-    """
-    Returns:
-      floor_model, floor_inliers,
-      wall_models (list), wall_inliers (list),
-      remaining_cloud (Open3D point cloud without floor+walls)
-    """
+
     remaining = pcd
     # — 1) Extract the largest plane (assumed floor) —
     floor_model, floor_inliers = remaining.segment_plane(
