@@ -1,8 +1,3 @@
-"""
-Video Processing Module
-Handles frame extraction and preprocessing from video files
-"""
-
 import cv2
 import numpy as np
 from typing import List, Tuple, Optional
