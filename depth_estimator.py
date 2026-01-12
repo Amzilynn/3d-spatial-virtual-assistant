@@ -9,9 +9,7 @@ warnings.filterwarnings('ignore')
 
 
 class DepthEstimator:
-    """
-    Depth Anything-based depth estimation for creating 3D point clouds
-    """
+
     
     def __init__(self, model_type: str = "small", device: Optional[str] = None):
         """
