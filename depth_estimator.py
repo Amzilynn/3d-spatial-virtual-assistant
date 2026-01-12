@@ -45,15 +45,7 @@ class DepthEstimator:
             raise
     
     def estimate_depth(self, frame: np.ndarray) -> np.ndarray:
-        """
-        Estimate depth map from RGB frame
-        
-        Args:
-            frame: Input frame (BGR format from OpenCV)
-            
-        Returns:
-            Depth map (normalized, float32)
-        """
+       
         # Convert BGR to RGB
         rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         
