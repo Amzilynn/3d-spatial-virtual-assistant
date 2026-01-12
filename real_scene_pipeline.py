@@ -9,12 +9,7 @@ from object_detector_real import RealObjectDetector
 class RealScenePipeline:
     
     def __init__(self, use_gpu: bool = True):
-        """
-        Initialize all components
-        
-        Args:
-            use_gpu: Whether to use GPU for depth estimation
-        """
+
         print("\n" + "="*60)
         print("   REAL SCENE PIPELINE - Initializing...")
         print("="*60)
