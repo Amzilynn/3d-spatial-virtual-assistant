@@ -81,19 +81,7 @@ class DepthEstimator:
         max_depth: float = 10.0,
         downsample: int = 4
     ) -> o3d.geometry.PointCloud:
-        """
-        Convert depth map and RGB to Open3D point cloud
-        
-        Args:
-            depth: Normalized depth map [0, 1]
-            rgb: RGB image (same size as depth)
-            focal_length: Camera focal length in pixels (auto-estimated if None)
-            max_depth: Maximum depth in meters
-            downsample: Downsample factor to reduce point count
-            
-        Returns:
-            Open3D PointCloud
-        """
+
         h, w = depth.shape
         
         # Estimate focal length if not provided (assuming standard camera)
@@ -150,17 +138,7 @@ class DepthEstimator:
         focal_length: Optional[float] = None,
         max_depth: float = 10.0
     ) -> Tuple[np.ndarray, o3d.geometry.PointCloud]:
-        """
-        End-to-end: estimate depth and create point cloud
-        
-        Args:
-            frame: Input frame (BGR)
-            focal_length: Camera focal length
-            max_depth: Maximum depth in meters
-            
-        Returns:
-            Tuple of (depth_map, point_cloud)
-        """
+       
         print("[DepthEstimator] Estimating depth...")
         depth = self.estimate_depth(frame)
         
