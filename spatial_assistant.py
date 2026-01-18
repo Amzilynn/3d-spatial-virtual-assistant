@@ -14,9 +14,7 @@ class SceneObject(NamedTuple):
     position: List[float]   # x, y, z
 
 class SceneGenerator:
-    """
-    Handles loading a point cloud or generating a synthetic 3D room.
-    """
+  
     
     def __init__(self):
         # Define standard objects for synthetic generation
