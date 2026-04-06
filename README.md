@@ -6,13 +6,13 @@ An AI-powered spatial assistant that understands 3D room layouts and answers nat
 
 ##  Features
 
-### Phase 1: MVP (Completed)
+### Phase 1: MVP 
 -  **Synthetic 3D Scene Generation**: Auto-generates a realistic room with furniture
 -  **Spatial Reasoning Engine**: Answers queries like "Where is the chair?" with human-readable directions
 -  **Interactive Visualization**: Real-time 3D highlighting with Open3D
 -  **100% Offline**: No internet required, runs locally
 
-### Phase 2: Real 3D Reconstruction (NEW! )
+### Phase 2: Real 3D Reconstruction
 -  **Video-to-3D Pipeline**: Converts room videos to 3D point clouds
 -  **Depth Estimation**: Using DepthAnything for accurate depth maps
 -  **Automatic Object Detection**: YOLOv8 identifies furniture (chairs, sofas, tables, etc.)
@@ -24,7 +24,7 @@ An AI-powered spatial assistant that understands 3D room layouts and answers nat
 
 ### Prerequisites
 - Python 3.12
-- Virtual environment: `C:\venvs\3Dvenv` (or modify paths accordingly)
+- Virtual environment: `C:\venvs\3Dvenv` 
 
 ### Installation
 
